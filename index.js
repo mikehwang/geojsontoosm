@@ -1,17 +1,19 @@
 var jxon = require('jxon');
 
 
-function geojsontoosm(geojson, lastNodeId, lastWayId, lastRelationId) {
+function geojsontoosm(geojson, lastNodeId, lastWayId, lastRelationId, additionalTags) {
     var features = geojson.features || (geojson.length>0 ? geojson : [geojson])
 
     var nodes = [], nodesIndex = {},
         ways = [],
         relations = [];
-
     features.forEach(function(feature) { // feature can also be a pure GeoJSON geometry object
         // todo: GeometryCollection?
         var properties = feature.properties || {},
-            geometry = feature.geometry || feature
+            geometry = feature.geometry || feature;
+
+        properties = Object.assign(properties, additionalTags[geometry.type]);
+
         // todo: validity check
         // todo: ids if (feature.id && feature.id.match(/^(node|way|relation)\/(\d+)$/)) id = …
         switch (geometry.type) {

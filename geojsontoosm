@@ -16,7 +16,11 @@ var geojsontoosm = require('./'),
         .options('start_relation_id', {
             'describe': 'starting integer for relation ids',
             'default': Number.MAX_SAFE_INTEGER,
-            'type': 'number' }),
+            'type': 'number' })
+        .options('tf', {
+            'alias': 'additional_tags_file',
+            'describe': 'json file containing additional tags to append per geometry type',
+            'type': 'string' }),
     argv = opt.argv,
     fs = require('fs'),
     geojsonStream = require('geojson-stream'),
@@ -43,6 +47,15 @@ var lastNodeId = argv.start_node_id,
     lastWayId = argv.start_way_id,
     lastRelationId = argv.start_relation_id;
 
+var additionalTags = (argv.tf
+    ? JSON.parse(fs.readFileSync(argv.tf, 'utf8')) : {});
+
+if (additionalTags) {
+    if (!require('./validate').validateAdditionalTags(additionalTags)) {
+        console.log("Additional tags did not validate successfully. Please correct your json.");
+        process.exit(1);
+    }
+}
 
 datastream
 .pipe(geojsonStream.parse())
@@ -51,6 +64,6 @@ datastream
 }))
 
 function convert(data) {
-    var result = geojsontoosm(data, lastNodeId, lastWayId, lastRelationId);
+    var result = geojsontoosm(data, lastNodeId, lastWayId, lastRelationId, additionalTags);
     process.stdout.write(result);
 }
