@@ -91,7 +91,7 @@ function geojsontoosm(geojson, lastNodeId, lastWayId, lastRelationId, additional
         } 
     }
     // todo: sort by id
-    return jxon.jsToString(jxonData)
+    return [jxon.jsToString(jxonData), lastNodeId, lastWayId, lastRelationId]
 }
 
 function getNodeHash(coords) {
